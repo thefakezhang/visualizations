@@ -1,3 +1,4 @@
+import java.util.*;
 public enum mode {QUICK, MERGE, SELECTION, INSERTION};
 
 String in = "1,2,3,4,5";
@@ -54,6 +55,44 @@ void draw(){
   pop();
 }
 
+void sort(){
+  switch(m){
+    case INSERTION:
+      for(int i = 0; i < list.size(); i++){
+        int elm = list.get(i);
+        int index = i-1;
+        while(index >= 0 && elm < list.get(index)){
+          list.set(index+1, list.get(index));
+          list.set(index, elm);
+          index--;
+        }
+      }
+      break;
+    case SELECTION:
+      for(int i = 0; i < list.size(); i++){
+        int min_index = i;
+        for(int j = i; j < list.size(); j++){
+          if(list.get(min_index) > list.get(j)){
+            min_index = j;
+          }
+        }
+        int min = list.get(min_index);
+        list.set(min_index, list.get(i));
+        list.set(i, min);
+      }
+      
+      break;
+    case QUICK:
+    
+      
+      break;
+    case MERGE:
+    
+    
+      break;
+  }
+}
+
 
 void parse(String numbers){
   String[] elms = numbers.split(",");
@@ -72,6 +111,11 @@ void parse(String numbers){
 void keyPressed(){
   if((keyCode >= '0' && keyCode <= '9') || keyCode == ','){
     in += (char)keyCode;
+  }
+  
+  if(key == 's' || key == 'S'){
+    sort();
+    println(m + " sorting");
   }
   
   //delete on backspace
