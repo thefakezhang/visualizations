@@ -6,7 +6,27 @@ boolean deleting = false;
 ArrayList<Integer> list = new ArrayList();
 int roof = 900;
 int maxInList = 5;
+boolean sorting;
 mode m;
+
+Stack<State> forward;
+Stack<State> backward;
+
+int green;
+int red;
+
+
+class State{
+  ArrayList<Integer> list;
+  int green;
+  int red;
+  
+  public State(ArrayList<Integer> l, int g, int r){
+    list = l;
+    green = g;
+    red = r;
+  }
+}
 
 void setup(){
   size(1500, 1000, FX2D);
@@ -17,8 +37,15 @@ void setup(){
   list.add(2);
   list.add(1);
   list.add(4);
+  sorting = false;
   
-  m = mode.SELECTION;
+  m = mode.INSERTION;
+  
+  forward = new Stack();
+  backward = new Stack();
+  
+  green = -1;
+  red = -1;
 }
 
 
@@ -36,12 +63,38 @@ void draw(){
   text(in, 0, 10, 800, 45); 
   pop();
   
+  if(!sorting){
+    frameRate(60);
+    drawList(list, green, red);
+  }else{
+    frameRate(2);
+    if(!forward.isEmpty()){
+      State s = forward.pop();
+      drawList(s.list, s.green, s.red);
+    }else{
+      sorting = false;
+    }
+  }
+  
+}
+
+void drawList(ArrayList<Integer> l, int g, int r){
   push();
   translate(0, height);
   float rectWidth = width/list.size();
   float xoff = 0;
   
-  for(int x: list){
+  for(int i = 0; i < l.size(); i++){
+    int x = l.get(i);
+    
+    if(i == g){
+      fill(0, 255, 0);
+    }
+    
+    if(i == r){
+      fill(255, 0 , 0);
+    }
+    
     float rectHeight = map(x, 0, maxInList, 0, roof);
     rect(xoff, -rectHeight , rectWidth, rectHeight);
     fill(255, 0, 255);
@@ -55,6 +108,7 @@ void draw(){
   pop();
 }
 
+
 void sort(){
   switch(m){
     case INSERTION:
@@ -64,6 +118,13 @@ void sort(){
         while(index >= 0 && elm < list.get(index)){
           list.set(index+1, list.get(index));
           list.set(index, elm);
+          
+          ArrayList<Integer> cpy = new ArrayList();
+          for(int x: list){
+            cpy.add(x);
+          }
+          
+          backward.push(new State(cpy, i, index));
           index--;
         }
       }
@@ -74,7 +135,15 @@ void sort(){
         for(int j = i; j < list.size(); j++){
           if(list.get(min_index) > list.get(j)){
             min_index = j;
+            
+            ArrayList<Integer> cpy = new ArrayList();
+            for(int x: list){
+            cpy.add(x);
+            }
+            
+            backward.push(new State(cpy, i, min_index ));
           }
+          
         }
         int min = list.get(min_index);
         list.set(min_index, list.get(i));
@@ -115,7 +184,12 @@ void keyPressed(){
   
   if(key == 's' || key == 'S'){
     sort();
+    sorting = true;
     println(m + " sorting");
+    
+    while(!backward.isEmpty()){
+      forward.push(backward.pop());
+    }
   }
   
   //delete on backspace
